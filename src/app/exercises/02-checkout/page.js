@@ -8,10 +8,13 @@ import CheckoutFlow from './CheckoutFlow';
 import './styles.css';
 
 function CheckoutExercise() {
-  const [items, dispatch] = React.useReducer(
-    reducer,
-    []
-  );
+  const [items, dispatch] = React.useReducer(reducer, []);
+
+  React.useEffect(() => {
+      dispatch({
+        type: 'load-cart',
+      });
+  },[]);
 
   return (
     <>
@@ -24,10 +27,34 @@ function CheckoutExercise() {
               key={item.id}
               item={item}
               handleAddToCart={(item) => {
+                console.log('handleAddToCart...');
                 dispatch({
                   type: 'add-item',
                   item,
                 });
+                const localCart = window.localStorage.getItem('cart');
+                const localCartItems = localCart
+                  ? JSON.parse(localCart)
+                  : [];
+                const localItemIndex = localCartItems.findIndex(
+                  (localItem) => item.id === localItem.id
+                );
+        
+                if (localItemIndex !== -1) {
+                  console.log('localItemIndex', localItemIndex)
+                  console.log('sumando...')
+                  localCartItems[localItemIndex].quantity += 1;
+                } else {
+                  console.log('Nuevo...')
+                  localCartItems.push({
+                    ...item,
+                    quantity: 1,
+                  });
+                }
+                window.localStorage.setItem(
+                  'cart',
+                  JSON.stringify(localCartItems)
+                );
               }}
             />
           ))}
